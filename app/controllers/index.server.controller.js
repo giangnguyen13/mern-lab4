@@ -6,7 +6,8 @@ const tf = require('@tensorflow/tfjs');
 //load iris training and testing data
 const iris = require('../../iris.json');
 const irisTesting = require('../../iris-testing.json');
-const epochsNumber = 100;
+var epochsNumber = 100;
+var learningRate = 0.06;
 var lossValue;
 
 exports.render = function (req, res) {
@@ -85,7 +86,7 @@ exports.trainAndPredict = function (req, res) {
     //compile the model with an MSE loss function and Adam algorithm
     model.compile({
         loss: 'meanSquaredError',
-        optimizer: tf.train.adam(0.06),
+        optimizer: tf.train.adam(learningRate),
     });
     console.log(model.summary());
     //
