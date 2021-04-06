@@ -6,8 +6,7 @@ const tf = require('@tensorflow/tfjs');
 //load iris training and testing data
 const iris = require('../../iris.json');
 const irisTesting = require('../../iris-testing.json');
-var epochsNumber = 100;
-var learningRate = 0.06;
+
 var lossValue;
 
 exports.render = function (req, res) {
@@ -17,7 +16,28 @@ exports.render = function (req, res) {
 };
 
 exports.trainAndPredict = function (req, res) {
-    console.log(irisTesting);
+    var epochsNumber =
+        req.query.epochs != undefined ? parseFloat(req.query.epochs) : 100;
+    var learningRate =
+        req.query.rate != undefined ? parseFloat(req.query.rate) : 0.06;
+    const data = {
+        sepal_length:
+            req.query.sepal_length != undefined
+                ? parseFloat(req.query.sepal_length)
+                : 4.9,
+        sepal_width:
+            req.query.sepal_width != undefined
+                ? parseFloat(req.query.sepal_width)
+                : 3,
+        petal_length:
+            req.query.petal_length != undefined
+                ? parseFloat(req.query.petal_length)
+                : 1.4,
+        petal_width:
+            req.query.petal_width != undefined
+                ? parseFloat(req.query.petal_width)
+                : 0.2,
+    };
     //
     // convert/setup our data for tensorflow.js
     //
@@ -48,14 +68,22 @@ exports.trainAndPredict = function (req, res) {
     //console.log(outputData.dataSync())
     //
     //tensor of features for testing data
-    const testingData = tf.tensor2d(
-        irisTesting.map((item) => [
-            item.sepal_length,
-            item.sepal_width,
-            item.petal_length,
-            item.petal_width,
-        ])
-    );
+    // const testingData = tf.tensor2d(
+    //     irisTesting.map((item) => [
+    // item.sepal_length,
+    // item.sepal_width,
+    // item.petal_length,
+    // item.petal_width,
+    //     ])
+    // );
+    const testingData = tf.tensor2d([
+        [
+            data.sepal_length,
+            data.sepal_width,
+            data.petal_length,
+            data.petal_width,
+        ],
+    ]);
     //console.log(testingData.dataSync())
     //
     // build neural network using a sequential model
@@ -102,46 +130,41 @@ exports.trainAndPredict = function (req, res) {
                 //list of callbacks to be called during training
                 onEpochEnd: async (epoch, log) => {
                     lossValue = log.loss;
-                    console.log(`Epoch ${epoch}: lossValue = ${log.loss}`);
+                    //console.log(`Epoch ${epoch}: lossValue = ${log.loss}`);
                     elapsedTime = Date.now() - startTime;
-                    console.log('elapsed time: ' + elapsedTime);
+                    //console.log('elapsed time: ' + elapsedTime);
                 },
             },
         });
 
         const results = model.predict(testingData);
-        //console.log('prediction results: ', results.dataSync())
-        //results.print()
+        // console.log('prediction results: ', results.dataSync());
+        // results.print();
 
         // get the values from the tf.Tensor
         //var tensorData = results.dataSync();
         results.array().then((array) => {
             console.log(array[0][0]);
             var resultForData1 = array[0];
-            var resultForData2 = array[1];
-            var resultForData3 = array[2];
+            // var resultForData2 = array[1];
+            // var resultForData3 = array[2];
             var dataToSent = {
                 row1: resultForData1,
-                row2: resultForData2,
-                row3: resultForData3,
+                result: getPredictResult(resultForData1),
+                // row2: resultForData2,
+                // row3: resultForData3,
             };
-            console.log(resultForData1);
             res.status(200).send(dataToSent);
-            //
-            /*
-            res.render('results',
-                {
-                    elapsedTime: elapsedTime / 1000,
-                    lossValue: lossValue,
-                    resultForData1: resultForData1[0],
-                    resultForData2: resultForData2,
-                    resultForData3: resultForData3
-                }
-            )
-            */
             //
         });
         //
     } //end of run function
     run();
 };
+
+function getPredictResult(result) {
+    const maxValue = Math.max(...result);
+    const species = ['setosa', 'virginica', 'versicolor'];
+    const index = result.indexOf(maxValue);
+    return species[index];
+}
