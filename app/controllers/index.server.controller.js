@@ -146,13 +146,8 @@ exports.trainAndPredict = function (req, res) {
         results.array().then((array) => {
             console.log(array[0][0]);
             var resultForData1 = array[0];
-            // var resultForData2 = array[1];
-            // var resultForData3 = array[2];
             var dataToSent = {
-                row1: resultForData1,
                 result: getPredictResult(resultForData1),
-                // row2: resultForData2,
-                // row3: resultForData3,
             };
             res.status(200).send(dataToSent);
             //
