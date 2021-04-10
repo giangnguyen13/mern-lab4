@@ -50,8 +50,6 @@ function InputDatForm() {
         <div>
             <main className='container'>
                 <div className='starter-template text-center py-5 px-3'>
-                    <h1 className='singup-title'>Spicies Checking</h1>
-                    <p className='lead'>Please fill in the information</p>
                     {showLoading && (
                         <Spinner animation='border' role='status'>
                             <span className='sr-only'>Loading...</span>
@@ -64,6 +62,8 @@ function InputDatForm() {
                     <br />
                     {!predict && (
                         <Form onSubmit={getSpecies}>
+                            <h1 className='singup-title'>Species Checking</h1>
+                            <p className='lead'>Please fill in the information</p>
                             <div className='row g-3 justify-content-center'>
                                 <div className='col-2'>
                                     <label
@@ -225,7 +225,7 @@ function Result(props) {
                 srcSet=''
             />
             &nbsp;
-            <div className='row justify-content-center'>
+            <div className='row justify-content-center p-3'>
                 <Button
                     variant='success'
                     type='submit'
